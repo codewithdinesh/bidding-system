@@ -1,5 +1,6 @@
 "use client"
 
+import Bid from '@/components/Bid';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
@@ -40,21 +41,7 @@ export default function BidPage({ params }) {
     }
 
     return (
-        <div className="p-4 border border-gray-300 rounded-md">
-            <h1 className="text-3xl font-bold mb-4">{bid.title}</h1>
-            <p className="text-gray-700 mb-4">End Time: {new Date(bid.endTime).toLocaleString()}</p>
-            <ul className="space-y-4">
-                {bid.bidItems.map((item, index) => (
-                    <li key={index} className="border border-gray-200 p-4 rounded-md">
-                        <p className="font-semibold">{item.description}</p>
-                        <p>Current Bid: ${item.currentBid}</p>
-                        <p>End Time: {new Date(item.endTime).toLocaleString()}</p>
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2">Place Bid</button>
-
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <Bid bid={bid} />
     );
 }
 

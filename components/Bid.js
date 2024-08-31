@@ -1,21 +1,39 @@
 "use client";
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { FaUser, FaGavel, FaClock, FaDollarSign } from 'react-icons/fa'; // Import icons
+import { FaUser, FaGavel, FaClock, FaDollarSign } from 'react-icons/fa';
 
 const Bid = ({ bid }) => {
-    const [socket, setSocket] = useState(null);
-    const router = useRouter();
     const [userId, setUserId] = useState(null);
-    const [userrole, setUserrole] = useState(null);
-    const [bidAmounts, setBidAmounts] = useState({}); // State to hold bid amounts for each item
+    const [bidAmounts, setBidAmounts] = useState({});
+    const [bidCreator, setBidCreator] = useState(null);
+    const [isBidEnded, setIsBidEnded] = useState(false);
+    const [winner, setWinner] = useState(null);
+    const [winnerUsername, setWinnerUsername] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         const storedUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
         setUserId(storedUserId);
-    }, []);
+
+        const currentTime = new Date();
+        const bidEndTime = new Date(bid.endTime);
+
+        // Check if the bid has ended
+        if (currentTime > bidEndTime) {
+            setIsBidEnded(true);
+
+            // Display winner if available
+            if (bid.winnerDeclared) {
+                const winningItem = bid.bidItems.reduce((max, item) => (item.currentBid > max.currentBid ? item : max), bid.bidItems[0]);
+                setWinner(winningItem.bidderId);
+                fetchWinnerUsername(winningItem.bidderId);
+            }
+        }
+
+        fetchUsername(bid?.creatorId);
+    }, [bid]);
 
     const handleInputChange = (index, value) => {
         setBidAmounts(prev => ({ ...prev, [index]: value }));
@@ -33,12 +51,53 @@ const Bid = ({ bid }) => {
 
             if (response.ok) {
                 const updatedBid = await response.json();
-                socket.emit('bid:update', updatedBid);
+                console.log('Bid placed:', updatedBid);
+                alert('Bid placed successfully');
+                setBidAmounts(prev => ({ ...prev, [itemIndex]: '' }));
+                router.reload();
             } else {
                 console.error('Failed to place bid');
+                alert('Failed to place bid');
             }
         } catch (error) {
             console.error('Error placing bid:', error);
+            alert('Error placing bid');
+        }
+    };
+
+    const fetchUsername = async (userId) => {
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                setBidCreator(user.username);
+            } else {
+                console.error('Failed to fetch username');
+            }
+        } catch (error) {
+            console.error('Error fetching username:', error);
+        }
+    };
+
+    const fetchWinnerUsername = async (winnerId) => {
+        try {
+            const response = await fetch(`/api/users/${winnerId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                setWinnerUsername(user.username);
+            } else {
+                console.error('Failed to fetch winner username');
+            }
+        } catch (error) {
+            console.error('Error fetching winner username:', error);
         }
     };
 
@@ -49,17 +108,29 @@ const Bid = ({ bid }) => {
                 <h2 className="text-2xl font-semibold text-gray-800">{bid.title}</h2>
             </div>
             <p className="text-gray-700 mb-4">{bid.description}</p>
-            <div className="flex items-center text-gray-600 mb-4">
-                <FaUser className="mr-2" />
-                <span>Posted by: {bid.creatorId?.username || 'Unknown'}</span>
-            </div>
-            <div className="flex items-center text-gray-600 mb-4">
-                <FaClock className="mr-2" />
-                <span>End Time: {new Date(bid.endTime).toLocaleString()}</span>
-            </div>
-            {bid.bidItems.map((item, index) => (
 
-                <Link href={`/bids/${bid._id}`} key={bid._id}>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center text-gray-600">
+                    <FaUser className="mr-2" />
+                    <span>Posted by: {bidCreator || 'Unknown'}</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                    <FaClock className="mr-2" />
+                    <span>End Time: {new Date(bid.endTime).toLocaleString()}</span>
+                </div>
+            </div>
+
+            {isBidEnded ? (
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                    <h3 className="text-xl font-semibold">Bid Ended</h3>
+                    {winner ? (
+                        <p className="text-green-600">Winner: {winnerUsername ? `User ${winnerUsername}` : 'Fetching winner...'}</p>
+                    ) : (
+                        <p className="text-red-600">No winner declared</p>
+                    )}
+                </div>
+            ) : (
+                bid.bidItems.map((item, index) => (
                     <div key={index} className="border-t border-gray-200 pt-4 mt-4">
                         <p className="mb-2">{item.description}</p>
                         <p className="mb-2 flex items-center">
@@ -85,8 +156,8 @@ const Bid = ({ bid }) => {
                             </button>
                         </div>
                     </div>
-                </Link>
-            ))}
+                ))
+            )}
         </li>
     );
 };

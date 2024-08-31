@@ -1,26 +1,23 @@
 "use client"
 
 import { useEffect } from 'react';
-import { io } from 'socket.io-client';
 import './globals.css';
 import Header from '@/components/Header';
 
 export default function RootLayout({ children }) {
-  // useEffect(() => {
-  //   const socket = io();
 
-  //   socket.on('connect', () => {
-  //     console.log('Connected to WebSocket server');
-  //   });
 
-  //   socket.on('disconnect', () => {
-  //     console.log('Disconnected from WebSocket server');
-  //   });
+  // const socket = io();
+  // socket.on('connect', () => {
+  //   console.log('Connected to socket server');
+  // });
 
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
+  // socket.on('bid:winnerDeclared', ({ bidId, winner }) => {
+  //   alert(`Bid ${bidId} has ended! Winner: User ${winner}`);
+  // });
+
+  // return () => socket.disconnect();
+
 
   return (
     <html lang="en">

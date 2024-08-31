@@ -8,7 +8,13 @@ export async function GET(req, { params }) {
     await connectDB();
     const { id } = params;
 
-    const bid = await Bid.findById(id).populate('creatorId invitedBidders acceptedBidders');
+    console.log(params);
+
+    const bid = await Bid.findById(id).populate('invitedBidders acceptedBidders');
+
+
+    console.log(bid);
+
     if (!bid) return NextResponse.json({ message: 'Bid not found' }, { status: 404 });
 
     return NextResponse.json(bid, { status: 200 });

@@ -14,3 +14,6 @@ export async function GET(req) {
 
     return NextResponse.json(users.map((user) => ({ username: user.username, role: user.role })));
 }
+
+
+
