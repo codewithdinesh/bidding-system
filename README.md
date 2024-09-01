@@ -16,6 +16,9 @@ A Next.js-based application for managing bids. Users can view ongoing and expire
 - **Backend**: Next.js
 - **Database**: MongoDB Atlas
 
+## Screenshots
+![image](https://github.com/user-attachments/assets/45e3ea96-1e4e-4454-935b-1e641ad81cd6)
+
 ## Setup
 ### Installation
 
