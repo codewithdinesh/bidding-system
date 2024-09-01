@@ -28,7 +28,7 @@ export default function Home() {
       // Set up interval to refresh ongoing bids every second
       const intervalId = setInterval(() => {
         fetchBids();
-      }, 100);
+      }, 1000);
 
       // Clear interval on component unmount
       return () => clearInterval(intervalId);

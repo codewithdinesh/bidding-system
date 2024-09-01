@@ -10,6 +10,7 @@ export async function GET(req, { params }) {
 
     console.log(params);
 
+    // sort by last created to old
     const bid = await Bid.findById(id).populate('invitedBidders acceptedBidders');
 
 

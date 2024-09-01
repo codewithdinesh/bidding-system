@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaGavel, FaClock, FaDollarSign } from 'react-icons/fa';
 
@@ -21,23 +21,29 @@ const Bid = ({ bid }) => {
         const currentTime = new Date();
         const bidEndTime = new Date(bid.endTime);
 
+        // Check if the bid has ended
         if (currentTime > bidEndTime) {
             setIsBidEnded(true);
 
+            // Determine the winner by finding the item with the highest current bid
             const winningItem = bid.bidItems.reduce(
                 (max, item) => (item.currentBid > max.currentBid ? item : max),
                 bid.bidItems[0]
             );
 
+            // Set the closing bid amount
             setDealClosedAtAmount(winningItem.currentBid);
 
+            // Fetch the username of the winner
             if (winningItem && winningItem.bidderId) {
                 fetchWinnerUsername(winningItem.bidderId);
             }
         }
 
+        console.log('Bid:', bid);
         fetchUsername(bid?.creatorId);
-        fetchAllBidderUsernames(bid.bidItems);
+
+        // fetchAllBidderUsernames(bid.bidItems);
     }, [bid]);
 
     const handleInputChange = (index, value) => {
@@ -56,16 +62,18 @@ const Bid = ({ bid }) => {
 
             if (response.ok) {
                 const updatedBid = await response.json();
+                // console.log('Bid placed:', updatedBid);
                 alert('Bid placed successfully');
                 setBidAmounts(prev => ({ ...prev, [itemIndex]: '' }));
-      
-                router.refresh();
+                router.replace(router.asPath); // Simulate page reload
             } else {
+                // console.error('Failed to place bid');
                 alert('Failed to place bid');
             }
         } catch (error) {
-            console.error('Error placing bid:', error);
-            alert('Error placing bid');
+            // console.error('Error placing bid:', error);
+            router.replace(router.asPath);
+            // alert('Error placing bid');
         }
     };
 
@@ -80,10 +88,10 @@ const Bid = ({ bid }) => {
                 const user = await response.json();
                 setBidCreator(user.username);
             } else {
-                console.error('Failed to fetch username');
+                // console.error('Failed to fetch username');
             }
         } catch (error) {
-            console.error('Error fetching username:', error);
+            // console.error('Error fetching username:', error);
         }
     };
 
@@ -153,28 +161,29 @@ const Bid = ({ bid }) => {
             {isBidEnded ? (
                 <div className="border-t border-gray-200 pt-4 mt-4">
                     <h3 className="text-xl font-semibold">Bid Ended</h3>
-                    <p className="text-gray-600 mb-2 flex items-center">
-                        <FaDollarSign className="mr-2" />
-                        Deal Closed At: ${dealClosedAtAmount}
+                    <p className="text-gray-600">
+
+                        <p className="mb-2 flex items-center">
+                            <FaDollarSign className="mr-2" />
+                            Deal Closed At:   ${dealClosedAtAmount}
+                        </p>
                     </p>
                     {winnerUsername ? (
-                        <p className="text-green-600 font-bold">Winner: {winnerUsername}</p>
+                        <p className="text-green-600  font-bold"> Winner: {winnerUsername}</p>
                     ) : (
                         <p className="text-red-600">No winner declared or fetching winner...</p>
                     )}
-                    <div className="mt-4">
+                    {/* <div className="mt-4">
                         <h4 className="text-lg font-semibold">All Bids Placed:</h4>
-                        <div className="rounded-md shadow-2xl py-3">
-                            {bid.bidItems.map((item, index) => (
-                                <div key={index} className="flex justify-between p-2 text-gray-700 border border-slate-300 m-1">
-                                    <div>${item.currentBid}</div>
-                                    <div>{bidderUsernames[index] || 'Unknown'}</div>
-                                </div>
-                            ))}
+                        <div className=" rounded-md shadow-2xl py-3">
+
+                           
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             ) : (
+
+
                 bid.bidItems.map((item, index) => (
                     <div key={index} className="border-t border-gray-200 pt-4 mt-4">
                         <p className="mb-2">{item.description}</p>
