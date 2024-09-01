@@ -3,29 +3,35 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CreateBid from '@/components/BidCreate';
-import Link from 'next/link';
 import Bid from '@/components/Bid';
 
 export default function Home() {
   const [ongoingBids, setOngoingBids] = useState([]);
   const [expiredBids, setExpiredBids] = useState([]);
   const [userId, setUserId] = useState(null);
-  const [userrole, setUserrole] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Retrieve userId and userrole from localStorage 
-    const storedUserrole = localStorage.getItem('role');
+    // Retrieve userId and userRole from localStorage 
+    const storedUserRole = localStorage.getItem('role');
     const storedUserId = localStorage.getItem('userId');
     setUserId(storedUserId);
-    setUserrole(storedUserrole);
+    setUserRole(storedUserRole);
 
     if (!storedUserId) {
-      router.push('/register');
-    } else if (storedUserrole === 'creator') {
+      router.push('/auth/login');
+    } else if (storedUserRole === 'creator') {
       fetchCreatorBids(storedUserId);
     } else {
       fetchBids();
+      // Set up interval to refresh ongoing bids every second
+      const intervalId = setInterval(() => {
+        fetchBids();
+      }, 100);
+
+      // Clear interval on component unmount
+      return () => clearInterval(intervalId);
     }
   }, [router]);
 
@@ -68,14 +74,11 @@ export default function Home() {
   return (
     <div className='rounded-md block md:flex'>
       {/* Show CreateBid component only if user role is 'creator' */}
-      {userrole === 'creator' && <CreateBid />}
+      {userRole === 'creator' && <CreateBid />}
 
       <div className="flex-1 ml-4">
         <div className='flex justify-between'>
-          <h1 className="text-2xl font-semibold my-2">
-            {'All Bids Listed'}
-          </h1>
-
+          <h1 className="text-2xl font-semibold my-2">All Bids Listed</h1>
         </div>
         <h2 className="text-xl font-semibold mb-4">Ongoing Bids</h2>
         {ongoingBids.length > 0 ? (

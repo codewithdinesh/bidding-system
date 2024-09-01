@@ -6,7 +6,7 @@ import Bid from '@/lib/models/Bid';
 export async function GET() {
   await connectDB();
 
-  const bids = await Bid.find().populate('creatorId invitedBidders acceptedBidders');
+  const bids = await Bid.find().populate('acceptedBidders');
   return NextResponse.json(bids, { status: 200 });
 }
 
